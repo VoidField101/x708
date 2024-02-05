@@ -98,7 +98,7 @@ def read_capacity(bus):
     return capacity
 
 
-def battery_monitor(update_interval, min_voltage, flag_quiet, flag_watch):
+def battery_monitor(update_interval, min_voltage, flag_watch, gpio_ac):
     # 0 = /dev/i2c-0 (port I2C0),
     # 1 = /dev/i2c-1 (port I2C1)
     bus = smbus.SMBus(1)
@@ -108,7 +108,7 @@ def battery_monitor(update_interval, min_voltage, flag_quiet, flag_watch):
             volt = read_voltage(bus)
 
             # --- Monitor voltage --- #
-            if not flag_watch and (volt < min_voltage):
+            if not flag_watch and (volt < min_voltage) and gpio_ac.value:
                 msg = "[!] Battery voltage below threshold (%.1fV)." % min_voltage
                 msg += " Emergency poweroff."
                 #print(msg)
@@ -201,7 +201,7 @@ def main():
     # --- Battery Monitor --- #
     if not flag_watch and min_voltage < 3:
         print("[!] WARNING: min_voltage below 3V")
-    return battery_monitor(int(update_interval), min_voltage, use_ncurses, flag_quiet, flag_watch)
+    return battery_monitor(int(update_interval), min_voltage, flag_watch, pld_gpio)
 
 # --------------------------------------- #
 
