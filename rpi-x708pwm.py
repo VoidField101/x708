@@ -27,7 +27,7 @@ this program. If not, see <http://www.gnu.org/licenses/>.
 
 from argparse import ArgumentParser, ArgumentTypeError
 from datetime import datetime
-from sys import stderr
+from sys import stderr,stdout
 import subprocess
 import gpiozero
 import struct
@@ -60,7 +60,7 @@ pos_float = lambda x: float(x) if is_positive_float(x) else raise_ex(
 
 def error(*msg):
     print(*msg, file=stderr)
-    # stderr.flush()
+    stderr.flush()
 
 
 def is_positive_int(n):
@@ -111,7 +111,7 @@ def battery_monitor(update_interval, min_voltage, flag_watch, gpio_ac):
             if not flag_watch and (volt < min_voltage) and gpio_ac.value:
                 msg = "[!] Battery voltage below threshold (%.1fV)." % min_voltage
                 msg += " Emergency poweroff."
-                #print(msg)
+                error(msg)
                 subprocess.call(['/usr/bin/wall', msg])
                 do_shutdown()
 
@@ -147,12 +147,12 @@ def pwr_btn_held_callback(pwr_button):
 # --- Power Loss Detection Callbacks --- #
 
 def ac_power_connected_callback(pld_gpio):
-    #print("AC power restored.")
-    pass
+    print("AC power restored.")
+    stdout.flush()
 
 def ac_power_lost_callback(pld_gpio):
-    #print("AC power lost. Running on batteries.")
-    pass
+    print("AC power lost. Running on batteries.")
+    stdout.flush()
 
 # --------------------------------------- #
 
