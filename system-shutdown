@@ -1,0 +1,28 @@
+ # Power off hardware @ x708 power management
+# If this code is reached from a normal shutdown/poweroff from software,
+# the x708 hard-poweroff performed by using the GPIO 13 works fine. We just
+# need to wait for it to complete, which in my rpi is ~5 seconds.
+# Even if we sleep for more seconds, the entire x708 hardware shuts down when
+# the operation is complete. However, when the x708 button is long-pressed (shutdown),
+# this gpio behaves differently for some reason. Therefore, when we shutdown the rpi
+# by using the physical button, the following action (GPIO 13) does nothing and
+# the sleep operation is done without interruption. This only affects to the shutdown,
+# and the reboot works as normal. This distinction can be checked by reading the value
+# of the GPIO 5. Therefore, if its returned value is 1, it means that the physical button
+# was pressed, so the whole logic with GPIO 13 should be skipped.
+
+ if [ "$1" = "halt" ] || [ "$1" = "poweroff" ]; then
+    GPIO_PWR_BUTTON=5
+    /usr/bin/echo ${GPIO_PWR_BUTTON} > /sys/class/gpio/export
+    echo "in" > /sys/class/gpio/gpio${GPIO_PWR_BUTTON}/direction
+    PWR_BUTTON_PRESSED=$(/usr/bin/cat /sys/class/gpio/gpio${GPIO_PWR_BUTTON}/value)
+    if [ ${PWR_BUTTON_PRESSED} -eq 0 ]; then
+        TIMEOUT=60
+        SHUTDOWN=13
+        /usr/bin/echo ${SHUTDOWN} > /sys/class/gpio/export
+        /usr/bin/echo "out" > /sys/class/gpio/gpio${SHUTDOWN}/direction
+        /usr/bin/echo "1" > /sys/class/gpio/gpio${SHUTDOWN}/value
+        # Wait for it
+        /usr/bin/sleep ${TIMEOUT}
+    fi
+fi
