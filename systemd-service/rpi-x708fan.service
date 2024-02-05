@@ -1,0 +1,12 @@
+[Unit]
+Description=RPI x708 Fan control daemon
+After=sysinit.target
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/rpi-x708fan.py
+PIDFile=/run/rpi-x708fan.pid
+Restart=always
+
+[Install]
+WantedBy=sysinit.target
