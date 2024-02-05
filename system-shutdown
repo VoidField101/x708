@@ -1,4 +1,6 @@
- # Power off hardware @ x708 power management
+#!/bin/bash
+
+# Power off hardware @ x708 power management
 # If this code is reached from a normal shutdown/poweroff from software,
 # the x708 hard-poweroff performed by using the GPIO 13 works fine. We just
 # need to wait for it to complete, which in my rpi is ~5 seconds.
@@ -14,7 +16,7 @@
  if [ "$1" = "halt" ] || [ "$1" = "poweroff" ]; then
     GPIO_PWR_BUTTON=5
     /usr/bin/echo ${GPIO_PWR_BUTTON} > /sys/class/gpio/export
-    echo "in" > /sys/class/gpio/gpio${GPIO_PWR_BUTTON}/direction
+    /usr/bin/echo "in" > /sys/class/gpio/gpio${GPIO_PWR_BUTTON}/direction
     PWR_BUTTON_PRESSED=$(/usr/bin/cat /sys/class/gpio/gpio${GPIO_PWR_BUTTON}/value)
     if [ ${PWR_BUTTON_PRESSED} -eq 0 ]; then
         TIMEOUT=60
